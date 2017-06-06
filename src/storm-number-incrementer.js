@@ -3,8 +3,8 @@ const CONSTANTS = {
 		TRIGGER_KEYCODES: [13, 32],
 	},
 	defaults = {
-		min: 100,
-		max: 0
+		min: 0,
+		max: 100
 	};
 
 const StormNumberIncrementer = {

@@ -1,6 +1,6 @@
 /**
  * @name storm-number-incrementer: Numeric input incrementer
- * @version 0.1.0: Tue, 11 Apr 2017 16:59:55 GMT
+ * @version 0.1.0: Tue, 06 Jun 2017 09:40:25 GMT
  * @author stormid
  * @license MIT
  */
@@ -28,8 +28,8 @@ var CONSTANTS = {
 	TRIGGER_KEYCODES: [13, 32]
 },
     defaults = {
-	min: 100,
-	max: 0
+	min: 0,
+	max: 100
 };
 
 var StormNumberIncrementer = {
