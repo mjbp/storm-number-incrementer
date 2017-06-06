@@ -1,6 +1,6 @@
 {
   "name": "storm-number-incrementer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Numeric input incrementer",
   "author": "stormid",
   "license": "MIT",
