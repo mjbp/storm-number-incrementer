@@ -1,6 +1,6 @@
 /**
  * @name storm-number-incrementer: Numeric input incrementer
- * @version 0.1.0: Tue, 06 Jun 2017 09:40:25 GMT
+ * @version 0.1.3: Mon, 26 Feb 2018 10:33:13 GMT
  * @author stormid
  * @license MIT
  */
@@ -29,7 +29,16 @@ var CONSTANTS = {
 },
     defaults = {
 	min: 0,
-	max: 100
+	max: 100,
+	callback: false
+},
+    findAncestorButton = function findAncestorButton(node) {
+	var match = false;
+	while (!match) {
+		if (node.hasAttribute('data-change')) match = node;
+		node = node.parentNode;
+	}
+	return match;
 };
 
 var StormNumberIncrementer = {
@@ -39,27 +48,35 @@ var StormNumberIncrementer = {
 		this.max = this.input.getAttribute('max') || this.settings.max;
 		this.min = this.input.getAttribute('min') || this.settings.min;
 
-		var boundTriggered = this.handleTriggered.bind(this);
+		this.boundHandler = this.handler.bind(this);
 
 		CONSTANTS.TRIGGER_EVENTS.forEach(function (trigger) {
 			_this.btns.forEach(function (btn) {
-				btn.addEventListener(trigger, function (e) {
-					boundTriggered(e, btn);
-				});
+				btn.addEventListener(trigger, _this.boundHandler);
 			});
 		});
 
 		return this;
 	},
-	handleTriggered: function handleTriggered(e, btn) {
+	handler: function handler(e) {
 		if (!!e.keyCode && !~CONSTANTS.TRIGGER_KEYCODES.indexOf(e.keyCode)) return;
-		this[btn.getAttribute('data-change')]();
+		this.input.value = this[findAncestorButton(e.target).getAttribute('data-change')]();
+		!!this.settings.callback && typeof this.settings.callback === 'function' && this.settings.callback.call(this);
 	},
 	increment: function increment() {
-		this.input.value = parseInt(this.input.value) + 1 > this.max ? this.max : parseInt(this.input.value) + 1;
+		return parseInt(this.input.value) + 1 > this.max ? this.max : parseInt(this.input.value) + 1;
 	},
 	decrement: function decrement() {
-		this.input.value = parseInt(this.input.value) - 1 < this.min ? this.min : parseInt(this.input.value) - 1;
+		return parseInt(this.input.value) - 1 < this.min ? this.min : parseInt(this.input.value) - 1;
+	},
+	destroy: function destroy() {
+		var _this2 = this;
+
+		CONSTANTS.TRIGGER_EVENTS.forEach(function (trigger) {
+			_this2.btns.forEach(function (btn) {
+				btn.removeEventListener(trigger, _this2.boundHandler);
+			});
+		});
 	}
 };
 

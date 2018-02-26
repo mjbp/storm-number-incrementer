@@ -4,33 +4,51 @@ const CONSTANTS = {
 	},
 	defaults = {
 		min: 0,
-		max: 100
+		max: 100,
+		callback: false
+	},
+	findAncestorButton = node => {
+		let match = false;
+		while(!match){
+			if(node.hasAttribute('data-change')) match = node;
+			node = node.parentNode;
+		}
+		return match;
 	};
+
 
 const StormNumberIncrementer = {
 	init(){
 		this.max = this.input.getAttribute('max') || this.settings.max;
 		this.min = this.input.getAttribute('min') || this.settings.min;
 
-		let boundTriggered = this.handleTriggered.bind(this);
+		this.boundHandler = this.handler.bind(this);
 
 		CONSTANTS.TRIGGER_EVENTS.forEach(trigger => { 
 			this.btns.forEach(btn => {
-				btn.addEventListener(trigger, e => { boundTriggered(e, btn);});
+				btn.addEventListener(trigger, this.boundHandler);
 			});
 		});
 
 		return this;
 	},
-	handleTriggered(e, btn){
+	handler(e){
 		if(!!e.keyCode && !~CONSTANTS.TRIGGER_KEYCODES.indexOf(e.keyCode)) return;
-		this[btn.getAttribute('data-change')]();
+		this.input.value = this[findAncestorButton(e.target).getAttribute('data-change')]();
+		(!!this.settings.callback && typeof this.settings.callback === 'function') && this.settings.callback.call(this);
 	},
 	increment(){
-		this.input.value = parseInt(this.input.value) + 1 > this.max ? this.max : parseInt(this.input.value) + 1;
+		return parseInt(this.input.value) + 1 > this.max ? this.max : parseInt(this.input.value) + 1;
 	},
 	decrement(){
-		this.input.value = parseInt(this.input.value) - 1 < this.min ? this.min : parseInt(this.input.value) - 1;
+		return parseInt(this.input.value) - 1 < this.min ? this.min : parseInt(this.input.value) - 1;
+	},
+	destroy() {
+		CONSTANTS.TRIGGER_EVENTS.forEach(trigger => { 
+			this.btns.forEach(btn => {
+				btn.removeEventListener(trigger, this.boundHandler);
+			});
+		});
 	}
 };
 
@@ -39,14 +57,12 @@ const init = (sel, opts) => {
 	
 	if(!els.length) return;
 
-	return els.map((el) => {
-		return Object.assign(Object.create(StormNumberIncrementer), {
+	return els.map((el) => Object.assign(Object.create(StormNumberIncrementer), {
 			node: el,
 			input: el.querySelector('input'),
 			btns: [].slice.call(el.querySelectorAll('[data-change]')),
 			settings: Object.assign({}, defaults, opts)
-		}).init();
-	});
+		}).init());
 };
 
 export default { init };
